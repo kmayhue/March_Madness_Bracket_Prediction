@@ -82,9 +82,15 @@ def parse_tournament_data(file_path, download_year):
                     #the team name that will serve as the team "key"
                     winner_key_team_name = winner_links[0]["href"].split("/")[3]
                     loser_key_team_name = loser_links[0]["href"].split("/")[3]
-                    #the score for the game
-                    winner_team_score = winner_links[1].contents[0]
-                    loser_team_score = loser_links[1].contents[0]
+                    #TODO this will break when you run this next year. Need to fix or update the year
+                    if download_year == 2022:
+                        #the score for the game
+                        winner_team_score = -99
+                        loser_team_score = -99
+                    else:
+                        #the score for the game
+                        winner_team_score = winner_links[1].contents[0]
+                        loser_team_score = loser_links[1].contents[0]
 
                     #save the data in the respective data structure
                     games_json[str(games_id)] = {"year": download_year, \
@@ -115,6 +121,9 @@ def parse_tournament_data(file_path, download_year):
                     break
                 elif round_counter == 7 and region == "national":
                     break
+                #TODO this will break when you run this next year. Need to fix or update the year
+                elif round_counter == 2 and download_year == 2022:
+                    break
 
     return {"tournament_data": games_json, "team_data": teams_json}
     
@@ -131,7 +140,8 @@ def load_dict_from_file(file_path):
 
 
 def main():
-
+    
+    
     teams_json = {}
     download_years = determine_years(sys.argv)
     for download_year in download_years:
@@ -145,7 +155,7 @@ def main():
 
         save_dict_to_file(tournament_jsons["tournament_data"], tournament_file_path)
         save_dict_to_file(tournament_jsons["team_data"], team_file_path)
-        
+    
     
 
 
