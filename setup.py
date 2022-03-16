@@ -11,7 +11,7 @@ def is_integer(n):
 
 def determine_years(sys_args):
     if len(sys_args) == 1:
-        return [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022]
+        return [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022]
     elif len(sys_args) == 2 and is_integer(sys_args[1]):
         return [int(sys_args[1])]
 
