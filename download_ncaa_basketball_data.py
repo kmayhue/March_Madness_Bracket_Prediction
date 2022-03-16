@@ -37,7 +37,34 @@ def check_data(filename, download_year):
     print("Data has not been downloaded. This program will now attempt to download {}.".format(filename))
     return True
 
+def save_tournament_html(download_year, pause=True):
+    '''
+    This function will do the following:
+    
+    1. build a url string to the following sports-reference website:
+        https://www.sports-reference.com/cbb/postseason/<year>-ncaa.html
+    2. check if the url has already been downloaded to our directory.
+    3. If already downloaded, then quit the function
+    4. If not downloaded, then download from the website and save the html file
+    5. Pause for a random amount of time to decrease the website load and avoid detection muahahaha 
 
+    
+    '''
+    url = "https://www.sports-reference.com/cbb/postseason/{}-ncaa.html".format(str(download_year))
+    file_name = url.strip("https://").replace("/", "|")
+    #file will be the same as the url minus "https://" and replacing / with |
+    save_path = "data/raw/{}/tournament/{}".format(str(download_year), file_name)
+
+    #check if the data is in our directory
+    if check_data(file_name, download_year) == False:
+        return False
+    #save the html to our folder
+    if save_html(url, save_path) == False:
+        return False
+    #pause for a random amount of time
+    if pause:
+        random_pause()
+    
 
 def main():
     '''
@@ -49,14 +76,12 @@ def main():
     download_years = determine_years(sys.argv)
 
     for download_year in download_years:
-        check_data("www.google.com", download_year)
-
+        #create the folder structure for the current download_year
         folder_structure = {str(download_year): {"tournament": None, "teams": None}}
         create_folder_structure(folder_structure, curr_path="data/raw/")
-        #random_pause()
+        #save the tournament html 
+        save_tournament_html(download_year, pause=True)
 
-        url = "https://www.google.com"
-        save_html(url, "data/raw/coaches/{}".format(url.strip("https://")))
 
 if __name__ == "__main__":
     main()

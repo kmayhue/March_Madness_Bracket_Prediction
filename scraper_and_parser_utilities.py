@@ -5,10 +5,8 @@ import random
 
 def save_html(url, save_path):
     '''
-    This function will grab the html from a website and save it to a file path
-
-
-    https://www.sports-reference.com/cbb/postseason/<year>-ncaa.html
+    This function will grab the html from a website and save it to a file path.
+    
     '''
     try:
         resp = requests.get(url)
@@ -45,10 +43,20 @@ def random_pause(max_pause=20):
 
 
 def main():
+    '''
+    Examples on how to use the functions above
+
     file_path = "data/raw/coaches/www.google.com"
     file_soup = soup_from_html_file(file_path)
 
     print(file_soup.prettify())
+
+
+    url = "https://www.google.com"
+    save_html(url, "data/raw/coaches/{}".format(url.strip("https://")))
+    
+    '''
+    pass
 
 
 if __name__ == "__main__":
