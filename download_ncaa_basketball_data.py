@@ -1,9 +1,9 @@
 
 import sys
 import os
-import requests
-import time
+
 from setup import create_folder_structure
+from scraper_and_parser_utilities import *
 
 def is_integer(n):
     try:
@@ -37,26 +37,7 @@ def check_data(filename, download_year):
     print("Data has not been downloaded. This program will now attempt to download {}.".format(filename))
     return True
 
-def get_tournament_html(year):
-    '''
-    This function will hit the sportsreference website and grab the tournament information 
-    for a given year. Then, it will save that html file to the following folder:
 
-        data
-            -raw
-                -year
-                    -tournament
-                        -https://www.sports-reference.com/cbb/postseason/<year>-ncaa.html
-
-    This assumes that you have already run setup.py
-    '''
-    pass
-
-def random_pause():
-    '''
-    This is definitely not a web crawler because I am randomly pausing....
-    '''
-    pass
 
 def main():
     '''
@@ -68,10 +49,14 @@ def main():
     download_years = determine_years(sys.argv)
 
     for download_year in download_years:
-        check_data("text.txt", download_year)
+        check_data("www.google.com", download_year)
 
         folder_structure = {str(download_year): {"tournament": None, "teams": None}}
         create_folder_structure(folder_structure, curr_path="data/raw/")
+        #random_pause()
+
+        url = "https://www.google.com"
+        save_html(url, "data/raw/coaches/{}".format(url.strip("https://")))
 
 if __name__ == "__main__":
     main()
