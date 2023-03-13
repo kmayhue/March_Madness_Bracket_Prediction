@@ -3,11 +3,7 @@ import sys
 import pandas as pd
 from bs4 import BeautifulSoup
 
-
-def main():
-    #read the system argument. There will only be a single argument, and it will be a filename
-    filename = sys.argv[1]
-
+def extract_team_data_from_html_file(filename):
     # Split the filename by the pipe character
     split_filename = filename.split("|")
 
@@ -23,9 +19,6 @@ def main():
     # Create a Beautiful Soup object from the HTML contents
     soup = BeautifulSoup(html_contents, "html.parser")
 
-    
-    
-    
     #4. Team stats
 
     per_game_team_stats = soup.find(id="schools_per_game")
@@ -158,10 +151,15 @@ def main():
     scoring_return = float(roster_info_text.split(" of minutes played and ")[1].split("%")[0])
     #add scoring_return to the team_data_df dataframe
     team_data_df["scoring_return"] = scoring_return
-    
-    print(team_data_df)
+
+    return team_data_df
 
 
+def main():
+    #read the system argument. There will only be a single argument, and it will be a filename
+    filename = sys.argv[1]
+
+    team_data = extract_team_data_from_html_file(filename)
 
 if __name__ == '__main__':
 
