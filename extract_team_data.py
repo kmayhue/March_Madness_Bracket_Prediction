@@ -10,6 +10,9 @@ def extract_team_data_from_html_file(filename):
     # Extract the school name and year from the split filename
     school_name = split_filename[3]
     year = split_filename[4].replace(".html", "")
+    # TODO *sigh 2022 is different, and it adds 'men' to the end of the filename
+    if year == "men":
+        year = split_filename[5].replace(".html", "")
 
     # Open the HTML file in read mode
     with open(filename, "r") as f:
@@ -22,6 +25,11 @@ def extract_team_data_from_html_file(filename):
     #4. Team stats
 
     per_game_team_stats = soup.find(id="schools_per_game")
+
+    #the html structure changed in 2022 *sigh
+    if per_game_team_stats is None:
+        per_game_team_stats = soup.find(id="season-total_per_game")
+
     #convert this html table to a dataframe
 
     #TODO IMPORTANT: DO NOT USE THE 2008-2009 SEASON, IT IS MISSING KEY STATS
@@ -78,23 +86,33 @@ def extract_team_data_from_html_file(filename):
     ps_g_p = soup.find_all("p")
     for elmt in ps_g_p:
         if "Record:" in elmt.text:
+            elmt_text = elmt.text.replace("\xa0", " ")
             #the record looks like the following:  
             # <strong>Record:</strong> 23-13&nbsp;(10-6, 4th in <a href='/cbb/conferences/mac/2009.html'>MAC</a> East)
-            wins = int(elmt.text.split("(")[0].split("-")[0].split(": ")[1])
-            losses = int(elmt.text.split("(")[0].split("-")[1])
-            conference_record = int(elmt.text.split("(")[1].split(")")[0].split(" in ")[0].split(", ")[1].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
-            conference = elmt.text.split("in ")[1].split(")")[0]
-
+            overall_wins = int(elmt_text.split("-")[0].split(" ")[-1])
+            overall_losses = int(elmt_text.split("-")[1].split(" ")[0])
+            overall_winning_percentage = overall_wins / (overall_wins + overall_losses)
+            conference_wins = int(elmt_text.split("(")[1].split(")")[0].split(", ")[0].split("-")[0])
+            conference_losses = int(elmt_text.split("(")[1].split(")")[0].split(", ")[0].split("-")[1])
+            conference_winning_percentage = conference_wins / (conference_wins + conference_losses)
+            conference_record = int(elmt_text.split("(")[1].split(")")[0].split(" in ")[0].split(", ")[1].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
+            conference = elmt_text.split("in ")[1].split(")")[0]
+            
             #add wins, losses, conference record, and conference to the team_data_df dataframe
-            team_data_df["wins"] = wins
-            team_data_df["losses"] = losses
+            team_data_df["overall_wins"] = overall_wins
+            team_data_df["overall_losses"] = overall_losses
+            team_data_df["overall_winning_percentage"] = overall_winning_percentage
+            team_data_df["conference_wins"] = conference_wins
+            team_data_df["conference_losses"] = conference_losses
+            team_data_df["conference_winning_percentage"] = conference_winning_percentage
             team_data_df["conference_record"] = conference_record
             team_data_df["conference"] = conference
 
         elif "PS/G" in elmt.text:
-            ps_g_value = float(elmt.text.split(": ")[1].split(" ")[0])
-            ps_g_rank = int(elmt.text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
-            ps_g_total = int(elmt.text.split("of ")[1].split(")")[0])
+            elmt_text = elmt.text.replace("\xa0", " ")
+            ps_g_value = float(elmt_text.split(": ")[1].split(" ")[0])
+            ps_g_rank = int(elmt_text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
+            ps_g_total = int(elmt_text.split("of ")[1].split(")")[0])
             
             #add psg_value, psg_rank, and psg_total to the team_data_df dataframe
             team_data_df["psg_value"] = ps_g_value
@@ -102,9 +120,10 @@ def extract_team_data_from_html_file(filename):
             team_data_df["psg_total"] = ps_g_total
 
         elif "PA/G" in elmt.text:
-            pa_g_value = float(elmt.text.split(": ")[1].split(" ")[0])
-            pa_g_rank = int(elmt.text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
-            pa_g_total = int(elmt.text.split("of ")[1].split(")")[0])
+            elmt_text = elmt.text.replace("\xa0", " ")
+            pa_g_value = float(elmt_text.split(": ")[1].split(" ")[0])
+            pa_g_rank = int(elmt_text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
+            pa_g_total = int(elmt_text.split("of ")[1].split(")")[0])
             
             #add pag_value, pag_rank, and pag_total to the team_data_df dataframe
             team_data_df["pag_value"] = pa_g_value
@@ -112,9 +131,10 @@ def extract_team_data_from_html_file(filename):
             team_data_df["pag_total"] = pa_g_total
 
         elif "SRS" in elmt.text:
-            srs_value = float(elmt.text.split(": ")[1].split(" ")[0])
-            srs_rank = int(elmt.text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
-            srs_total = int(elmt.text.split("of ")[1].split(")")[0])
+            elmt_text = elmt.text.replace("\xa0", " ")
+            srs_value = float(elmt_text.split(": ")[1].split(" ")[0])
+            srs_rank = int(elmt_text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
+            srs_total = int(elmt_text.split("of ")[1].split(")")[0])
             
             #add srs_value, srs_rank, and srs_total to the team_data_df dataframe
             team_data_df["srs_value"] = srs_value
@@ -122,9 +142,10 @@ def extract_team_data_from_html_file(filename):
             team_data_df["srs_total"] = srs_total
 
         elif "SOS" in elmt.text:
-            sos_value = float(elmt.text.split(": ")[1].split(" ")[0])
-            sos_rank = int(elmt.text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
-            sos_total = int(elmt.text.split("of ")[1].split(")")[0])
+            elmt_text = elmt.text.replace("\xa0", " ")
+            sos_value = float(elmt_text.split(": ")[1].split(" ")[0])
+            sos_rank = int(elmt_text.split("(")[1].split(" ")[0].replace("th", "").replace("st", "").replace("nd", "").replace("rd", ""))
+            sos_total = int(elmt_text.split("of ")[1].split(")")[0])
             
             #add sos_value, sos_rank, and sos_total to the team_data_df dataframe
             team_data_df["sos_value"] = sos_value
@@ -134,21 +155,18 @@ def extract_team_data_from_html_file(filename):
     #4. Average height and years of experience of the team, and returning minutes and scoring
     roster_info = soup.find(id="tfooter_roster")
     roster_info_text = roster_info.find("small").text
-    
-    avg_height_text = roster_info_text.split("Avg. Height:\xa0")[1].split("Avg. Years Exp:\xa0")[0]
-    avg_height = int(avg_height_text.split("-")[0]) * 12 + int(avg_height_text.split("-")[1])
-    # add avg_height to the team_data_df dataframe
-    team_data_df["avg_height"] = avg_height
 
-    avg_years_exp = float(roster_info_text.split("Avg. Years Exp:\xa0")[1].split("Averages weighted by minutes played")[0])
-    #add avg_years_exp to the team_data_df dataframe
-    team_data_df["avg_years_exp"] = avg_years_exp
-
-    minutes_returned = float(roster_info_text.split("% of minutes played and ")[0][-4:])
+    try:
+        minutes_returned = float(roster_info_text.split("% of minutes played and ")[0][-4:])
+    except:
+        minutes_returned = -1.0
     #add minutes_returned to the team_data_df dataframe
     team_data_df["minutes_returned"] = minutes_returned
 
-    scoring_return = float(roster_info_text.split(" of minutes played and ")[1].split("%")[0])
+    try:
+        scoring_return = float(roster_info_text.split(" of minutes played and ")[1].split("%")[0])
+    except:
+        scoring_return = -1.0
     #add scoring_return to the team_data_df dataframe
     team_data_df["scoring_return"] = scoring_return
 
