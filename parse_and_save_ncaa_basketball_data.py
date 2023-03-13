@@ -83,7 +83,7 @@ def parse_tournament_data(file_path, download_year):
                     winner_key_team_name = winner_links[0]["href"].split("/")[3]
                     loser_key_team_name = loser_links[0]["href"].split("/")[3]
                     #TODO this will break when you run this next year. Need to fix or update the year
-                    if download_year == 2022:
+                    if download_year == 2023:
                         #the score for the game
                         winner_team_score = -99
                         loser_team_score = -99
